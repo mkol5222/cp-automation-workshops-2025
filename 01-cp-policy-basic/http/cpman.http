@@ -1,0 +1,78 @@
+# read server from .env
+@CPSERVER={{$dotenv CHECKPOINT_SERVER}}
+@CPCLOUDID={{$dotenv CHECKPOINT_CLOUD_ID}}
+@CPAPIKEY={{$dotenv CHECKPOINT_API_KEY}}
+
+###
+# @name login
+# RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_ID}/web_api/login" \
+#   -H "Content-Type: application/json" \
+#   -d "$PAYLOAD")
+
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/login
+Content-Type: application/json
+
+{ 
+    "api-key": "{{CPAPIKEY}}" 
+}
+
+###
+@SID={{login.response.body.sid}}
+
+###
+# @name show-accessrulebase
+
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/show-access-rulebase
+Content-Type: application/json
+X-chkp-sid: {{SID}}
+
+{
+    "name": "Network",
+    "limit": 10,
+    "offset": 0
+}
+
+###
+# @name add-host
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/add-host
+Content-Type: application/json
+X-chkp-sid: {{SID}}
+
+{
+    "name": "cloudflare-dns",
+    "ip-address": "1.1.1.1",
+    "color": "red",
+    "tags": [
+        "dns",
+        "MadeByTF"
+    ]
+}
+
+###
+# @name publish
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/publish
+Content-Type: application/json
+X-chkp-sid: {{SID}}
+
+{
+}
+
+###
+# @name show-task
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/show-task
+Content-Type: application/json
+X-chkp-sid: {{SID}}
+
+{
+    "task-id": "{{publish.response.body.task-id}}"
+}
+###
+# @name logout
+POST https://{{CPSERVER}}/{{CPCLOUDID}}/web_api/logout
+Content-Type: application/json
+X-chkp-sid: {{SID}}
+
+{
+}
+
+###
