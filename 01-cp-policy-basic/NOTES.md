@@ -228,3 +228,32 @@ terraform output -raw proxy_details | jq .
 
 ## Publishing changes and dependencies
 
+Until now we have been publishing changes on clicops side - in SmartConsole list of sessions.
+What if we want to publish changes from Terraform side?
+
+There is dedicated resource for that - `checkpoint_management_publish` [resource](https://registry.terraform.io/providers/CheckPointSW/checkpoint/latest/docs/resources/checkpoint_management_publish).
+
+Naive attempt to publish changes:
+```shell
+cat <<EOF > publish.tf
+resource "checkpoint_management_publish" "publish" {
+
+}
+EOF
+terraform apply
+```
+
+There are some catches however:
+- each terraform resource is creared only once - next time publish will not be called, bcease resource is created and valid - there is `triggers` argument to force it to be recreated
+- execution order, we want to publish at the end - order is calculated by dependencies and we did not specify imlicit or explicit dependencies for the publish resource - we can use `depends_on` argument to force
+
+```shell
+cat <<EOF > publish.tf
+resource "checkpoint_management_publish" "publish" {
+  depends_on = [checkpoint_management_host.servac, checkpoint_management_host.example]
+  triggers = [timestamp()]
+}
+EOF
+# mark some resource(s) to be re-created - so we can se order of execution
+terraform apply -replace=checkpoint_management_host.example 
+```
