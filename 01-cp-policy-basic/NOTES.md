@@ -42,12 +42,12 @@ Look at API instructions in the Smart-1 Cloud settings section.
 We can try our first API call using curl command:
 ```bash
 export CHECKPOINT_SERVER=cp-automation-wo-rj0p0coc.maas.checkpoint.com
-export CHECKPOINT_CLOUD_MGMT_ID =a4008bc9-e0b4-4807-ae74-4d4469ff9f7f
+export CHECKPOINT_CLOUD_MGMT_ID=a4008bc9-e0b4-4807-ae74-4d4469ff9f7f
 export CHECKPOINT_API_KEY=your_api_key
 
 export PAYLOAD=$(jq -n --arg api_key "${CHECKPOINT_API_KEY}" '{"api-key": $api_key}')
 
-RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_MGMT_ID }/web_api/login" \
+RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_MGMT_ID}/web_api/login" \
   -H "Content-Type: application/json" \
   -d "$PAYLOAD")
 echo $RESPONSE | jq .
@@ -57,12 +57,13 @@ Assume we want to use obtained token `sid` in the next API calls. We can use `jq
 ```bash
 
 export SID=$(echo $RESPONSE | jq -r '.sid')
+echo $SID
 
 # latest API reference https://sc1.checkpoint.com/documents/latest/APIs/
 
 PAYLOAD=$(jq -n '{"details-level": "full", name: "Network"}')
 
-RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_MGMT_ID }/web_api/show-access-rulebase" \
+RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_MGMT_ID}/web_api/show-access-rulebase" \
   -H "Content-Type: application/json" \
   -H "X-chkp-sid: ${SID}" \
   -d "$PAYLOAD")
@@ -136,7 +137,39 @@ export CHECKPOINT_API_KEY=your_api_key
 
 # detect configuration drift
 terraform plan
+# it will detedt host not yet exists, and suggests to create it
 
 # apply changes needed to reach desired state
 terraform apply
 ```
+
+- visit SmartConsole in Manage section and review active sessions
+- identify the session created by Terraform
+- right click on the session and choose `Review change report`
+- now you can publish and disconnect the session
+- see Host object in Network objects section
+
+Lets remove the object we just created:
+```shell
+# remove all resources managed by this Terraform code
+terraform destroy
+# it will remove the host object we just created
+```
+
+- revisit SmartConsole, find 'Review change report' 
+- and publish the changes again
+
+Summary: we know how to extend Terraform capabilities with Check Point provider, how to authenticate to specific Security Management server and how to manage Check Point objects using IaC declarative approach.
+
+## Conflict - Terraform vs SmartConsole (DevOps vs ClickOps)
+
+- TODO: demonstration adopting EXISTING host object in SmartConsole by Terraform
+    - options:
+        - remove object and recreate it from TF
+        - import existing object into TF state with `terraform import` command
+        - keep SmartConsole ownership of objecta and use data resurce to reference it read-only
+    - additional topics:
+        - protect objects between devops and clickops using Pre-Publish SmartTask 
+
+## Publishing changes and dependencies
+
