@@ -1,11 +1,11 @@
 # read server from .env
 @CPSERVER={{$dotenv CHECKPOINT_SERVER}}
-@CPCLOUDID={{$dotenv CHECKPOINT_CLOUD_ID}}
+@CPCLOUDID={{$dotenv CHECKPOINT_CLOUD_MGMT_ID }}
 @CPAPIKEY={{$dotenv CHECKPOINT_API_KEY}}
 
 ###
 # @name login
-# RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_ID}/web_api/login" \
+# RESPONSE=$(curl -s -X POST "https://${CHECKPOINT_SERVER}/${CHECKPOINT_CLOUD_MGMT_ID }/web_api/login" \
 #   -H "Content-Type: application/json" \
 #   -d "$PAYLOAD")
 
