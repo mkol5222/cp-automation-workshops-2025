@@ -257,3 +257,8 @@ EOF
 # mark some resource(s) to be re-created - so we can se order of execution
 terraform apply -replace=checkpoint_management_host.example 
 ```
+
+### Next
+
+- will continue with infrastructure and more complex policy in https://github.com/mkol5222/cgns-azure-workshop-2025
+- [SmartTasks](https://sc1.checkpoint.com/documents/R82/WebAdminGuides/EN/CP_R82_SecurityManagement_AdminGuide/Content/Topics-SECMG/SmartTasks.htm) - e.g. protecting objects between devops and clickops
