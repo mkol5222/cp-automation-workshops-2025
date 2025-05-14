@@ -258,6 +258,72 @@ EOF
 terraform apply -replace=checkpoint_management_host.example 
 ```
 
+We may also make publish conditional based on terraform variable:
+```shell
+cat <<EOF > publish.tf
+variable "publish" {
+  description = "Publish changes"
+  type        = bool
+  default     = false
+}
+resource "checkpoint_management_publish" "publish" {
+  count = var.publish ? 1 : 0
+  depends_on = [checkpoint_management_host.servac, checkpoint_management_host.example]
+  triggers = [timestamp()]
+}
+EOF
+
+# with publish
+terraform apply -var publish=true
+# without publish
+terraform apply -var publish=false
+# publish missing on list of executed operations
+```
+
+### Bulk import of objects from CSV
+
+Terraform is also efficient working on top of data structures like JSON, YAML and CSV files that are general description of objects or result of API call to some IS or ticketing system.
+
+```shell
+# CSV file with objects
+cat <<EOF > hosts.csv
+name,ipv4_address,color
+pankrac,10.0.0.19,red
+bulkservac,192.168.10.10,orange
+bonifac,172.16.0.1,blue
+EOF
+
+cat hosts.csv
+
+# resource definition may iterate over CSV file
+cat <<EOF > csv_hosts.tf
+locals {
+  objects = csvdecode(file("hosts.csv"))
+}
+
+resource "checkpoint_management_host" "csv" {
+  for_each = { for obj in local.objects : obj.name => obj }
+
+  name        = each.value.name
+  ipv4_address = each.value.ipv4_address
+  color       = each.value.color
+  tags       = ["terraform", "bulk"]
+}
+EOF
+
+terraform plan
+
+rm sid.json
+export CHECKPOINT_SESSION_NAME="Bulk import"
+terraform apply
+
+# update host CSV - change color
+sed -i 's/orange/cyan/' hosts.csv
+cat hosts.csv
+terraform plan
+terraform apply -auto-approve
+```
+
 ### Next
 
 - will continue with infrastructure and more complex policy in https://github.com/mkol5222/cgns-azure-workshop-2025
