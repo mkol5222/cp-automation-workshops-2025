@@ -167,7 +167,62 @@ Summary: we know how to extend Terraform capabilities with Check Point provider,
     - options:
         - remove object and recreate it from TF
         - import existing object into TF state with `terraform import` command
+
+Create and publish a new host object called `servac` and make sure you publish it. 
+
+![alt text](image.png)
+```shell
+# do same from TF
+cat <<EOF >> servac.tf
+resource "checkpoint_management_host" "servac" {
+  name         = "servac"
+  ipv4_address = "192.0.2.107"
+  color = "blue"
+  tags = ["MadeByTerraform"]
+}
+EOF
+terraform plan
+# would suggest to create a new object as no such resource exists in TF state
+terraform apply
+# API server disagrees
+# │ 1. More than one object named 'servac' exists.
+
+# we should import CP object of type host and name servac to TF address checkpoint_management_host.servac
+terraform import checkpoint_management_host.servac "servac"
+
+# now part of state
+terraform state list | grep servac
+
+# and even get code from SmartConsole side
+terraform state show checkpoint_management_host.servac
+
+# but TF is now ultimate source of truth and will detect drift and set (TF) desired state from `servac.tf`
+terraform apply
+# find session, publish and see result in SmartConsole
+# once published, object is blue and MadeByTerraform tag is set
+```
+
         - keep SmartConsole ownership of objecta and use data resurce to reference it read-only
+```shell
+# objects can be also adopted from SmartConsole read only
+cat <<EOF > proxy.tf
+data "checkpoint_management_data_service_tcp" "proxy_service" {
+    name = "HTTP_proxy"
+}
+output "proxy_port" {
+    value = data.checkpoint_management_data_service_tcp.proxy_service.port
+}
+output "proxy_details" {
+    value = jsonencode(data.checkpoint_management_data_service_tcp.proxy_service)
+}
+EOF
+
+terraform apply
+
+terraform output proxy_port
+terraform output -raw proxy_details | jq .
+```
+
     - additional topics:
         - protect objects between devops and clickops using Pre-Publish SmartTask 
 
