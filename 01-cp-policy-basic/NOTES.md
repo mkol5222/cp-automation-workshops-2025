@@ -43,7 +43,8 @@ We can try our first API call using curl command:
 ```bash
 export CHECKPOINT_SERVER=cp-automation-wo-rj0p0coc.maas.checkpoint.com
 export CHECKPOINT_CLOUD_MGMT_ID=a4008bc9-e0b4-4807-ae74-4d4469ff9f7f
-export CHECKPOINT_API_KEY=your_api_key
+export CHECKPOINT_API_KEY=FTGlFmIU0T8mRjmEHTaSOQ==
+
 
 export PAYLOAD=$(jq -n --arg api_key "${CHECKPOINT_API_KEY}" '{"api-key": $api_key}')
 

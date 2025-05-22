@@ -57,9 +57,9 @@ Continue in powershell:
 ```powershell
 # credentials for Check Point Management
 # from https://cp-automation-wo-rj0p0coc.maas.checkpoint.com/a4008bc9-e0b4-4807-ae74-4d4469ff9f7f/web_api/login
-$env:CHECKPOINT_SERVER="cp-automation-wo-rj0p0coc.maas.checkpoint.com"
-$env:CHECKPOINT_API_KEY="FoeLJHK52p+NlzMlXJr2oA=="
-$env:CHECKPOINT_CLOUD_MGMT_ID="a4008bc9-e0b4-4807-ae74-4d4469ff9f7f"
+$env:CHECKPOINT_SERVER="training-appsec--h7sfbjch.maas.checkpoint.com"
+$env:CHECKPOINT_API_KEY="6TGLSeRWHDqaanoNo9ahhg=="
+$env:CHECKPOINT_CLOUD_MGMT_ID="6e08f928-af40-4af8-bcd6-4e3dfad6f195"
 # format code
 .\terraform.exe fmt
 gc main.tf
